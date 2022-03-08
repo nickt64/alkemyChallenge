@@ -26,7 +26,7 @@ namespace AlkemyChallenge.Controllers
 
         //------------listado de personajes------------------
         [HttpGet]
-        [Route("/characters")]
+        [Route("characters")]
         //devolver solo campo imagen y nombre con personajeDetalleDTO
         public async Task<ActionResult<List<PersonajeListadoDTO>>> Get()
         {
@@ -35,7 +35,7 @@ namespace AlkemyChallenge.Controllers
             return mapper.Map<List<PersonajeListadoDTO>>(personajes);
         }
         
-        [HttpGet("GetPersId")]
+        [HttpGet("DetalleCompletoId",Name ="GetPersId")]
         public async Task<ActionResult<PersonajeDTO>> Get(int id)
         {
             var personaje = await myDbContext.Personajes.FirstOrDefaultAsync(p => p.PersonajeId == id);
@@ -51,34 +51,20 @@ namespace AlkemyChallenge.Controllers
 
         //busscar personaje con filtros
         [HttpGet("{nombre}")]
-        public async Task<ActionResult<List<PersonajeDTO>>> Get(string nombre, [FromQuery] int edad, int peso)
+        public async Task<ActionResult<List<PersonajeDTO>>> Get([FromQuery] string nombre, int edad, int peso)
         {
             var personajes = await myDbContext.Personajes.ToListAsync();
             
             List<Personaje> pers = new();
             foreach (var p in personajes)
             {
-
-                if ((edad == 0 && peso == 0) && p.Nombre.Contains(nombre))
-                {
-                    pers.Add(p);
-                }
-                else 
-                if ((edad == 0 && peso != 0) && (p.Peso == peso && p.Nombre.Contains(nombre)))
-                {
-                    pers.Add(p);
-                }
-                  else 
-                if ((edad!=0 && peso == 0)&&(p.Edad==edad && p.Nombre.Contains(nombre))){
-                    pers.Add(p);
-                }
-                else 
-                if ((edad!=0 && peso != 0 ) && (p.Edad==edad && p.Peso==peso && p.Nombre.Contains(nombre))){
-                    pers.Add(p);
-                }else { return NotFound(); }
+                if ((edad == 0 && peso == 0) && p.Nombre.Contains(nombre)) { pers.Add(p); }
+                if ((edad == 0 && peso != 0) && (p.Peso == peso && p.Nombre.Contains(nombre))) { pers.Add(p); }
+                if ((edad != 0 && peso == 0) && (p.Edad == edad && p.Nombre.Contains(nombre))) { pers.Add(p); }
+                if ((edad != 0 && peso != 0) && (p.Edad == edad && p.Peso == peso && p.Nombre.Contains(nombre))) { pers.Add(p); }
             }
-         
-            if (pers == null)
+
+            if (pers.Count==0)
             {
                 return NotFound();
             }
@@ -90,7 +76,7 @@ namespace AlkemyChallenge.Controllers
 
         //---------CREACION DE PERSONAJES-------------
         [HttpPost]
-        public async Task<ActionResult<PersonajeDTO>> post([FromBody]PersonajeCreacionDTO personajeCreacionDTO)
+        public async Task<ActionResult<PersonajeDTO>> post(PersonajeCreacionDTO personajeCreacionDTO)
         {
             var personaje = mapper.Map<Personaje>(personajeCreacionDTO);
             myDbContext.Add(personaje);

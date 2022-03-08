@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,6 +15,8 @@ namespace AlkemyChallenge.Models
         public string Nombre { get; set; }
         public int Edad { get; set; }
         public string Historia { get; set; }
+
+        public List<PersonajesPeliculas> PersonajesPeliculas { get; set; }
 
     }
 }

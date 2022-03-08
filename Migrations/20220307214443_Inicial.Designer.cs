@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlkemyChallenge.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20220306234429_PersonajePeso")]
-    partial class PersonajePeso
+    [Migration("20220307214443_Inicial")]
+    partial class Inicial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,6 +34,9 @@ namespace AlkemyChallenge.Migrations
                     b.Property<string>("Nombre")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PeliculaId")
+                        .HasColumnType("int");
+
                     b.HasKey("GeneroId");
 
                     b.ToTable("Generos");
@@ -52,6 +55,9 @@ namespace AlkemyChallenge.Migrations
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("GeneroId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Imagen")
                         .HasColumnType("nvarchar(max)");
 
@@ -59,6 +65,8 @@ namespace AlkemyChallenge.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PeliculaId");
+
+                    b.HasIndex("GeneroId");
 
                     b.ToTable("Peliculas");
                 });
@@ -88,6 +96,64 @@ namespace AlkemyChallenge.Migrations
                     b.HasKey("PersonajeId");
 
                     b.ToTable("Personajes");
+                });
+
+            modelBuilder.Entity("AlkemyChallenge.Models.PersonajesPeliculas", b =>
+                {
+                    b.Property<int>("PersonajeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PeliculaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonajeId", "PeliculaId");
+
+                    b.HasIndex("PeliculaId");
+
+                    b.ToTable("PersonajesPeliculas");
+                });
+
+            modelBuilder.Entity("AlkemyChallenge.Models.Pelicula", b =>
+                {
+                    b.HasOne("AlkemyChallenge.Models.Genero", null)
+                        .WithMany("Peliculas")
+                        .HasForeignKey("GeneroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AlkemyChallenge.Models.PersonajesPeliculas", b =>
+                {
+                    b.HasOne("AlkemyChallenge.Models.Pelicula", "Pelicula")
+                        .WithMany("PersonajesPeliculas")
+                        .HasForeignKey("PeliculaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AlkemyChallenge.Models.Personaje", "Personaje")
+                        .WithMany("PersonajesPeliculas")
+                        .HasForeignKey("PersonajeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pelicula");
+
+                    b.Navigation("Personaje");
+                });
+
+            modelBuilder.Entity("AlkemyChallenge.Models.Genero", b =>
+                {
+                    b.Navigation("Peliculas");
+                });
+
+            modelBuilder.Entity("AlkemyChallenge.Models.Pelicula", b =>
+                {
+                    b.Navigation("PersonajesPeliculas");
+                });
+
+            modelBuilder.Entity("AlkemyChallenge.Models.Personaje", b =>
+                {
+                    b.Navigation("PersonajesPeliculas");
                 });
 #pragma warning restore 612, 618
         }

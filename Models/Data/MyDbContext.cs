@@ -13,11 +13,17 @@ namespace AlkemyChallenge.Models.Data
         {
 
         }
+        protected override void OnModelCreating(ModelBuilder modelbuilder)
+        {
+            modelbuilder.Entity<PersonajesPeliculas>().HasKey(x => new { x.PersonajeId, x.PeliculaId });
 
+            base.OnModelCreating(modelbuilder);
+        }
         public DbSet<Personaje> Personajes { get; set; }
 
         public DbSet<Genero> Generos { get; set; }
         public DbSet<Pelicula> Peliculas { get; set; }
+        public DbSet<PersonajesPeliculas> PersonajesPeliculas { get; set; }
 
     }
 }

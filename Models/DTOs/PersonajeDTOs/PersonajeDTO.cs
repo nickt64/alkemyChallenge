@@ -20,6 +20,7 @@ namespace AlkemyChallenge.Models.DTOs
         public string Nombre { get; set; }
         [Required]
         public int Edad { get; set; }
+        [Required]
         public string Historia { get; set; }
 
         

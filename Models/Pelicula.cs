@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ namespace AlkemyChallenge.Models
         public DateTime FechaCreacion { get; set; }
 
         public int Calificacion { get; set; }
-
-        //public List<Personaje> Personajes { get; set; }
+        public int GeneroId { get; set; }
+        public List<PersonajesPeliculas> PersonajesPeliculas     { get; set; }
     }
 }

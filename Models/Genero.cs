@@ -10,6 +10,9 @@ namespace AlkemyChallenge.Models
         public int GeneroId { get; set; }
         public string Imagen { get; set; }
         public string Nombre { get; set; }
-        //public List<Pelicula> PeliculasAsociadas { get; set; }
+
+        public int PeliculaId { get; set; }
+        public List<Pelicula> Peliculas { get; set; }
+        
     }
 }

@@ -8,7 +8,7 @@ namespace AlkemyChallenge.Models.DTOs
 {
     public class PersonajeCreacionDTO
     {
-        public int Imagen { get; set; }
+        public string Imagen { get; set; }
         [Required]
         public int Peso { get; set; }
         [Required]
