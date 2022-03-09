@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace AlkemyChallenge.Models.DTOs
 {
     public class PersonajeCreacionDTO
     {
-        public string Imagen { get; set; }
+        public IFormFile Imagen { get; set; }
         [Required]
         public int Peso { get; set; }
         [Required]

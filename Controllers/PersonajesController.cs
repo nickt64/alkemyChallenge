@@ -8,6 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System.ComponentModel.DataAnnotations;
 
 namespace AlkemyChallenge.Controllers
 {
@@ -15,13 +18,19 @@ namespace AlkemyChallenge.Controllers
     [ApiController]
     [Route("api/Personajes")]
     public class PersonajesController : ControllerBase
+
     {
+        //para cargar imagenes
+        private readonly IWebHostEnvironment webHostEnvironment;
+       
+        
         private readonly MyDbContext myDbContext;
         private readonly IMapper mapper;
-        public PersonajesController(MyDbContext myDbContext, IMapper mapper)
+        public PersonajesController(MyDbContext myDbContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             this.myDbContext = myDbContext;
             this.mapper = mapper;
+            this.webHostEnvironment  = webHostEnvironment;
         }
 
         //------------listado de personajes------------------
@@ -50,42 +59,81 @@ namespace AlkemyChallenge.Controllers
 
 
         //busscar personaje con filtros
-        [HttpGet("{nombre}")]
-        public async Task<ActionResult<List<PersonajeDTO>>> Get([FromQuery] string nombre, int edad, int peso)
+        [HttpGet("BuscarPersonajes")]
+        public async Task<ActionResult<List<PersonajeDTO>>> BuscarPersonajes([FromQuery] [Required] string nombre, int? edad, int? peso)
         {
-            var personajes = await myDbContext.Personajes.ToListAsync();
-            
-            List<Personaje> pers = new();
-            foreach (var p in personajes)
+            var query = myDbContext.Personajes.Where(x => x.Nombre.Contains(nombre));
+
+            if (edad != null) // .HasValue son lo mismo
             {
-                if ((edad == 0 && peso == 0) && p.Nombre.Contains(nombre)) { pers.Add(p); }
-                if ((edad == 0 && peso != 0) && (p.Peso == peso && p.Nombre.Contains(nombre))) { pers.Add(p); }
-                if ((edad != 0 && peso == 0) && (p.Edad == edad && p.Nombre.Contains(nombre))) { pers.Add(p); }
-                if ((edad != 0 && peso != 0) && (p.Edad == edad && p.Peso == peso && p.Nombre.Contains(nombre))) { pers.Add(p); }
+                query = query.Where(x => x.Edad == edad.Value);
             }
 
-            if (pers.Count==0)
+            if (peso.HasValue)
+            {
+                query = query.Where(x => x.Peso == peso.Value);
+            }
+
+            var personajes = await query.ToListAsync();
+
+            if (personajes.Count == 0) // !personajes.Any()
             {
                 return NotFound();
             }
-            return mapper.Map<List<PersonajeDTO>>(pers);
+
+            var result = new List<PersonajeDTO>();
+
+            foreach (var personaje in personajes)
+            {
+                var personajeDto = mapper.Map<PersonajeDTO>(personaje);
+
+                if (personaje.Imagen != null)
+                {
+                    var bytes = System.IO.File.ReadAllBytes(personaje.Imagen);
+                    personajeDto.ImagenBase64 = Convert.ToBase64String(bytes);
+                }
+
+                result.Add(personajeDto);
+            }
+
+            return result;
         }
 
         
-
-
         //---------CREACION DE PERSONAJES-------------
-        [HttpPost]
-        public async Task<ActionResult<PersonajeDTO>> post(PersonajeCreacionDTO personajeCreacionDTO)
+        [HttpPost("CrearPersonaje")]
+        public async Task<ActionResult<PersonajeDTO>> CrearPersonaje([FromForm] PersonajeCreacionDTO personajeCreacionDTO)
         {
+            var validExtensions = new[] { ".jpg", ".png" };
+
+            if (!validExtensions.Contains(System.IO.Path.GetExtension(personajeCreacionDTO.Imagen.FileName).ToLower()))
+            {
+                return BadRequest(new { Message = "Extension no valida" });
+            }
+
+
+            var rutaCarpeta = Path.Combine(webHostEnvironment.WebRootPath, "imagenes");
+            var nombreIdArchivo = Guid.NewGuid().ToString() + "_" + personajeCreacionDTO.Imagen.FileName;
+            var rutaArchivo = Path.Combine(rutaCarpeta, nombreIdArchivo);
+
+            using (var fileStream = new FileStream(rutaArchivo, FileMode.Create))
+            {
+                personajeCreacionDTO.Imagen.CopyTo(fileStream);
+            }
+            
             var personaje = mapper.Map<Personaje>(personajeCreacionDTO);
+
+            personaje.Imagen = rutaArchivo;
+
             myDbContext.Add(personaje);
 
             await myDbContext.SaveChangesAsync();
+
             var dto = mapper.Map<PersonajeDTO>(personaje);
 
             return new CreatedAtRouteResult("GetPersId", new {id = personaje.PersonajeId }, dto);
         }
+
 
         //------------------EDICION ----------------------------
 

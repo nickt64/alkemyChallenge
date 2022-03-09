@@ -9,9 +9,7 @@ namespace AlkemyChallenge.Models.DTOs
 {
     public class PersonajeDTO
     {
-        
         public int PersonajeId { get; set; }
-        public string Imagen { get; set; }
 
         [Required]
         public int Peso { get; set; }
@@ -23,6 +21,7 @@ namespace AlkemyChallenge.Models.DTOs
         [Required]
         public string Historia { get; set; }
 
+        public string ImagenBase64 { get; set; }
         
     }
 }

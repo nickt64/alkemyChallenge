@@ -17,6 +17,7 @@ namespace AlkemyChallenge.Models
         [DataType(DataType.Date)]
         public DateTime FechaCreacion { get; set; }
 
+        [Range(1,5)][Display(Prompt ="1 a 5")]
         public int Calificacion { get; set; }
         public int GeneroId { get; set; }
         public List<PersonajesPeliculas> PersonajesPeliculas     { get; set; }
